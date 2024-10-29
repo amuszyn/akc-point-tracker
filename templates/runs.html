@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>{{dog.name}}'s Runs</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+
+<body>
+	<div class="container">
+			<h1>{{dog.name}}'s Runs</h1>
+			<a href="/create-run/{{show_name}}" class="btn btn-primary mb-3">Add A Run</a>
+		{% if dog %}
+		<table class ="table table-striped">
+			<thead>
+				<tr>
+					<th>Show Name</th>
+					<th>Owner</th>
+					<th>Pet Name</th>
+					<th>Total Points</th>
+				</tr>
+			</thead>
+			<tbody>
+					<td>{{ dog.owner}}</td>
+					<td>{{ dog.show_name}}</td>
+					<td>{{ dog.name}}</td>
+					<td>{{ dog.points}}</td>
+			</tbody>
+
+		{% endif %}
+
+		{% if items %}
+		<table class="table table-striped">
+			<thead>
+				<tr>
+					<th>Date</th>
+					<th>Judge</th>
+					<th>Placement</th>
+					<th>Run Time</th>
+					<th>Course Time</th>
+					<th>Qualified</th>
+					<th>Points Earned</th>
+					<th>Trial Club</th>
+					<th>Jump Height</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for item in items %}
+				<tr>
+					<td>{{ item.date}}</td>
+					<td>{{ item.judge}}</td>
+					<td>{{ item.place}}</td>
+					<td>{{ item.run_time}}</td>
+					<td>{{ item.course_time}}</td>
+					<td>{{ item.qualification}}</td>
+					<td>{{ item.points }}</td>
+					<td>{{ item.trial}}</td>
+					<td>{{ item.height}}</td>
+					<td>
+						<a href="/update-run/{{ item.id }}" class="btn btn-warning">Update</a>
+						<a href="/delete-run/{{ item.id }}" class="btn btn-danger">Delete</a>
+					</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+		{% else %}
+			<p>No items found. Please <a href="/create-run/{{show_name}}">create a new item</a>.</p>
+		{% endif %}
+	</div>
+</body>
+
+</html>

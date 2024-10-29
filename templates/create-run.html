@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Add A Dog</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+
+<body>
+	<div class="container">
+		<h1>Add A Run For Your Dog</h1>
+		<form method="POST">
+			<div class="form-group">
+				<label for="name">Name</label>
+				<input type="text" class="form-control" id="name" name="name" required
+					value="{{dog.name}}" disabled>
+			</div>
+			<div class="form-group">
+				<label for="show_name">Show Name</label>
+				<input class="form-control" id="show_name" name="show_name" required
+					value="{{dog.show_name}}" disabled>
+
+			</div>
+			<div class="form-group">
+				<label for="timestamp">Run Date</label>
+				<input type="date" class="form-control" id="timestamp" name="timestamp">
+			</div>
+			<div class="form-group">
+				<label for="owner">Owner's Name</label>
+				<input type="text" class="form-control" id="owner" name="owner" required
+					value="{{dog.owner}}" disabled>
+			</div>
+			<div class="form-group">
+				<label for="run_time">Run Time</label>
+				<input type="text" class="form-control" id="run_time" name="run_time" required>
+			</div>
+			<div class="form-group">
+				<label for="course_time">Course Time</label>
+				<input type="text" class="form-control" id="course_time" name="course_time" required>
+			</div>
+			<div class="form-group">
+				<label for="handler">Handler Name</label>
+				<input type="text" class="form-control" id="handler" name="handler">
+			</div>
+			<div class="form-group">
+				<label for="trial">Trial Club Name</label>
+				<input type="text" class="form-control" id="trial" name="trial">
+			</div>
+			<div class="form-group">
+				<label for="judge">Judge</label>
+				<input type="text" class="form-control" id="judge" name="judge">
+			</div>
+			<div class="form-group">
+				<label for="height">Height</label>
+				<select name="height" id="height">
+					{% for jump_height in jump_heights %}
+					<option value={{jump_height}}>{{jump_height}}</option>
+					{% endfor %}
+			</div>
+			<div class="form-group">
+				<label for="run_class">Class</label>
+				<select name="run_class" id="run_class">
+					<option value="1st">option</option>
+			</div>
+			<div class="form-group">
+				<label for="place">Placement</label>
+				<select name="place" id="place">
+					{% for place in placement %}
+					<option value={{place}}>{{place}}</option>
+					{% endfor %}
+			</div>
+			<button type="submit" class="btn btn-primary">Create</button>
+		</form>
+	</div>
+</body>
+
+</html>
