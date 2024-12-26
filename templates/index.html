@@ -8,43 +8,45 @@
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 
-<body>
-	<div class="container">
-		<h1>Dogs by AKC Agility Points</h1>
-		<a href="/create-dog" class="btn btn-primary mb-3">Add New Item</a>
+{% include 'app-bar.html' %}
 
-		{% if items %}
-		<table class="table table-striped">
-			<thead>
-				<tr>
-					<th>ID</th>
-					<th>Name</th>
-					<th>Show Name</th>
-					<th>Points</th>
-					<th>Owner's Name</th>
-					<th>Actions</th>
-				</tr>
-			</thead>
-			<tbody>
-				{% for item in items %}
-				<tr class="clickable" onclick="window.location.href='/runs/{{item.show_name}}'">
-					<td>{{ item.id }}</td>
-					<td>{{ item.name }}</td>
-					<td>{{ item.show_name}}</td>
-					<td>{{ item.points}}</td>
-					<td>{{ item.owner}}</td>
-					<td>
-						<a href="/update-dog/{{ item.id }}" class="btn btn-warning">Update</a>
-						<a href="/delete-dog/{{ item.id }}" class="btn btn-danger">Delete</a>
-					</td>
-				</tr>
-				{% endfor %}
-			</tbody>
-		</table>
-		{% else %}
-		<p>No items found. Please <a href="/create-dog">create a new item</a>.</p>
-		{% endif %}
-	</div>
+<div class="container">
+
+	<h1>Dogs by AKC Agility Points</h1>
+	<a href="/create-dog" class="btn btn-primary mb-3">Add New Item</a>
+
+	{% if items %}
+	<table class="table table-striped">
+		<thead>
+			<tr>
+				<th>ID</th>
+				<th>Name</th>
+				<th>Show Name</th>
+				<th>Points</th>
+				<th>Owner's Name</th>
+				<th>Actions</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for item in items %}
+			<tr class="clickable" onclick="window.location.href='/runs/{{item.show_name}}'">
+				<td>{{ item.id }}</td>
+				<td>{{ item.name }}</td>
+				<td>{{ item.show_name}}</td>
+				<td>{{ item.points}}</td>
+				<td>{{ item.owner}}</td>
+				<td>
+					<a href="/update-dog/{{ item.id }}" class="btn btn-warning">Update</a>
+					<a href="/delete-dog/{{ item.id }}" class="btn btn-danger">Delete</a>
+				</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+	{% else %}
+	<p>No items found. Please <a href="/create-dog">create a new item</a>.</p>
+	{% endif %}
+</div>
 </body>
 
 </html>

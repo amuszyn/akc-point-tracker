@@ -8,6 +8,8 @@
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 
+{% include 'app-bar.html' %}
+
 <body>
 	<div class="container">
 		<h1>Add A Run For Your Dog</h1>
@@ -55,23 +57,33 @@
 			<div class="form-group">
 				<label for="height">Height</label>
 				<select name="height" id="height">
+					<option value="N/A">----</option>
 					{% for jump_height in jump_heights %}
 					<option value={{jump_height}}>{{jump_height}}</option>
 					{% endfor %}
-			</div>
-			<div class="form-group">
-				<label for="run_class">Class</label>
-				<select name="run_class" id="run_class">
-					<option value="1st">option</option>
+				</select>
 			</div>
 			<div class="form-group">
 				<label for="place">Placement</label>
 				<select name="place" id="place">
-					{% for place in placement %}
+					<option value="N/A">----</option>
+					{% for place in placements %}
 					<option value={{place}}>{{place}}</option>
 					{% endfor %}
+				</select>
 			</div>
+			<div class="form-group">
+				<label for="run_class">Class</label>
+				<select name="run_class" id="run_class">
+					<option value="N/A">----</option>
+					{% for run in run_class %}
+					<option value={{run}}>{{run}}</option>
+					{% endfor %}
+				</select>
+			</div>
+
 			<button type="submit" class="btn btn-primary">Create</button>
+			<button type="menu" class="btn">Cancel</button>
 		</form>
 	</div>
 </body>
