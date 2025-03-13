@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AKC Point Tracker</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        /* Color scheme from app-bar and leaderboard */
+        :root {
+            --primary-color: #6200ea;
+            --primary-light: rgba(98, 0, 234, 0.05);
+            --primary-hover: #3700b3;
+            --text-on-primary: white;
+        }
+        
+        /* Navbar styling */
+        .navbar {
+            background-color: var(--primary-color) !important;
+        }
+        
+        .navbar-dark .navbar-nav .nav-link {
+            color: var(--text-on-primary);
+        }
+        
+        .navbar-dark .navbar-nav .nav-link:hover {
+            color: #ffcc00;
+        }
+        
+        /* Button styling */
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            border-color: var(--primary-hover);
+        }
+        
+        /* Card styling */
+        .card-header {
+            background-color: var(--primary-color);
+            color: var(--text-on-primary);
+        }
+        
+        /* Table styling */
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: var(--primary-light);
+        }
+        
+        /* OAuth buttons */
+        .oauth-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .oauth-button {
+            display: block;
+            padding: 10px;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        
+        .google-btn {
+            background-color: #DB4437;
+            color: white;
+        }
+        
+        .github-btn {
+            background-color: #333;
+            color: white;
+        }
+        
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+        }
+        
+        .divider-line {
+            flex-grow: 1;
+            height: 1px;
+            background-color: #ddd;
+        }
+        
+        .divider-text {
+            padding: 0 10px;
+            color: #777;
+        }
+        
+        /* Medal colors for leaderboards */
+        .medal-1 {
+            color: gold;
+            font-weight: bold;
+        }
+        .medal-2 {
+            color: silver;
+            font-weight: bold;
+        }
+        .medal-3 {
+            color: #cd7f32;
+            font-weight: bold;
+        }
+        
+        /* Avatar styling */
+        .avatar-container {
+            position: relative;
+        }
+        
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            color: var(--primary-color);
+            cursor: pointer;
+        }
+        
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background-color: white;
+            color: black;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+            overflow: hidden;
+            z-index: 100;
+        }
+        
+        .dropdown-menu a {
+            display: block;
+            padding: 0.5rem 1rem;
+            text-decoration: none;
+            color: var(--primary-color);
+            transition: background-color 0.3s;
+        }
+        
+        .dropdown-menu a:hover {
+            background-color: #f2f2f2;
+        }
+        
+        .avatar-container.active .dropdown-menu {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('main.index') }}">AKC Point Tracker</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.index') }}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dogs.create_dog') }}">Add Dog</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('leaderboard.show_leaderboards') }}">Leaderboards</a>
+                    </li>
+                </ul>
+                <!-- Authentication Links -->
+                <ul class="navbar-nav ms-auto">
+                    {% if current_user.is_authenticated %}
+                        <li class="nav-item">
+                            <div class="avatar-container" onclick="toggleDropdown(event)">
+                                <div class="avatar">{{ current_user.username[0].upper() }}</div>
+                                <div class="dropdown-menu">
+                                    <a href="{{ url_for('auth.profile') }}">Profile</a>
+                                    <a href="{{ url_for('auth.logout') }}">Sign Out</a>
+                                </div>
+                            </div>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('auth.signup') }}">Sign Up</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script>
+        function toggleDropdown(event) {
+            // Prevent closing when clicking inside the dropdown
+            event.stopPropagation();
+
+            const avatarContainer = event.currentTarget;
+            avatarContainer.classList.toggle('active');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', () => {
+            const dropdowns = document.querySelectorAll('.avatar-container.active');
+            dropdowns.forEach(dropdown => dropdown.classList.remove('active'));
+        });
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html> 

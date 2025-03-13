@@ -1,0 +1,16 @@
+[project]
+name = "akc-point-tracker"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11.1"
+dependencies = [
+    "alembic>=1.15.1",
+    "flask>=3.1.0",
+    "flask-login>=0.6.3",
+    "flask-migrate>=4.1.0",
+    "flask-sqlalchemy>=3.1.1",
+    "psycopg2-binary>=2.9.10",
+    "sqlalchemy>=2.0.39",
+    "werkzeug>=3.1.3",
+]
