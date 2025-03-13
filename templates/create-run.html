@@ -1,91 +1,77 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Add A Dog</title>
-	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-</head>
-
-{% include 'app-bar.html' %}
-
-<body>
-	<div class="container">
-		<h1>Add A Run For Your Dog</h1>
-		<form method="POST">
-			<div class="form-group">
-				<label for="name">Name</label>
-				<input type="text" class="form-control" id="name" name="name" required
-					value="{{dog.name}}" disabled>
-			</div>
-			<div class="form-group">
-				<label for="show_name">Show Name</label>
-				<input class="form-control" id="show_name" name="show_name" required
-					value="{{dog.show_name}}" disabled>
-
-			</div>
-			<div class="form-group">
-				<label for="timestamp">Run Date</label>
-				<input type="date" class="form-control" id="timestamp" name="timestamp">
-			</div>
-			<div class="form-group">
-				<label for="owner">Owner's Name</label>
-				<input type="text" class="form-control" id="owner" name="owner" required
-					value="{{dog.owner}}" disabled>
-			</div>
-			<div class="form-group">
-				<label for="run_time">Run Time</label>
-				<input type="text" class="form-control" id="run_time" name="run_time" required>
-			</div>
-			<div class="form-group">
-				<label for="course_time">Course Time</label>
-				<input type="text" class="form-control" id="course_time" name="course_time" required>
-			</div>
-			<div class="form-group">
-				<label for="handler">Handler Name</label>
-				<input type="text" class="form-control" id="handler" name="handler">
-			</div>
-			<div class="form-group">
-				<label for="trial">Trial Club Name</label>
-				<input type="text" class="form-control" id="trial" name="trial">
-			</div>
-			<div class="form-group">
-				<label for="judge">Judge</label>
-				<input type="text" class="form-control" id="judge" name="judge">
-			</div>
-			<div class="form-group">
-				<label for="height">Height</label>
-				<select name="height" id="height">
-					<option value="N/A">----</option>
-					{% for jump_height in jump_heights %}
-					<option value={{jump_height}}>{{jump_height}}</option>
-					{% endfor %}
-				</select>
-			</div>
-			<div class="form-group">
-				<label for="place">Placement</label>
-				<select name="place" id="place">
-					<option value="N/A">----</option>
-					{% for place in placements %}
-					<option value={{place}}>{{place}}</option>
-					{% endfor %}
-				</select>
-			</div>
-			<div class="form-group">
-				<label for="run_class">Class</label>
-				<select name="run_class" id="run_class">
-					<option value="N/A">----</option>
-					{% for run in run_class %}
-					<option value={{run}}>{{run}}</option>
-					{% endfor %}
-				</select>
-			</div>
-
-			<button type="submit" class="btn btn-primary">Create</button>
-			<button type="menu" class="btn">Cancel</button>
-		</form>
+{% block content %}
+<h1>Add A Run For Your Dog</h1>
+<form method="POST">
+	<div class="form-group">
+		<label for="name">Name</label>
+		<input type="text" class="form-control" id="name" name="name" required value="{{dog.name}}" disabled>
 	</div>
-</body>
+	<div class="form-group">
+		<label for="show_name">Show Name</label>
+		<input class="form-control" id="show_name" name="show_name" required value="{{dog.show_name}}" disabled>
+	</div>
+	<div class="form-group">
+		<label for="timestamp">Run Date</label>
+		<input type="date" class="form-control" id="timestamp" name="timestamp" required
+			pattern="\d{4}-\d{2}-\d{2}" 
+			placeholder="YYYY-MM-DD"
+			title="Please use YYYY-MM-DD format">
+		<small class="form-text text-muted">Format: YYYY-MM-DD</small>
+	</div>
+	<div class="form-group">
+		<label for="owner">Owner's Name</label>
+		<input type="text" class="form-control" id="owner" name="owner" required value="{{dog.owner}}" disabled>
+	</div>
+	<div class="form-group">
+		<label for="run_time">Run Time</label>
+		<input type="text" class="form-control" id="run_time" name="run_time" required>
+	</div>
+	<div class="form-group">
+		<label for="course_time">Course Time</label>
+		<input type="text" class="form-control" id="course_time" name="course_time" required>
+	</div>
+	<div class="form-group">
+		<label for="handler">Handler Name</label>
+		<input type="text" class="form-control" id="handler" name="handler">
+	</div>
+	<div class="form-group">
+		<label for="trial">Trial Club Name</label>
+		<input type="text" class="form-control" id="trial" name="trial">
+	</div>
+	<div class="form-group">
+		<label for="judge">Judge</label>
+		<input type="text" class="form-control" id="judge" name="judge">
+	</div>
+	<div class="form-group">
+		<label for="height">Height</label>
+		<select name="height" id="height" class="form-control">
+			<option value="N/A">----</option>
+			{% for height in heights %}
+			<option value="{{height}}">{{height}}</option>
+			{% endfor %}
+		</select>
+	</div>
+	<div class="form-group">
+		<label for="place">Placement</label>
+		<select name="place" id="place" class="form-control">
+			<option value="N/A">----</option>
+			{% for place in placements %}
+			<option value="{{place}}">{{place}}</option>
+			{% endfor %}
+		</select>
+	</div>
+	<div class="form-group">
+		<label for="run_class">Class</label>
+		<select name="run_class" id="run_class" class="form-control">
+			<option value="N/A">----</option>
+			{% for class in classes %}
+			<option value="{{class}}">{{class}}</option>
+			{% endfor %}
+		</select>
+	</div>
 
-</html>
+	<button type="submit" class="btn btn-primary">Create</button>
+	<a href="/runs/{{dog.show_name}}" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %}

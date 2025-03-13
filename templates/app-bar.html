@@ -250,11 +250,19 @@
 
 		<!-- User Avatar Dropdown -->
 		<div class="avatar-container" onclick="toggleDropdown(event)">
-			<div class="avatar">U</div>
+			{% if current_user.is_authenticated %}
+			<div class="avatar">{{ current_user.username[0].upper() }}</div>
 			<div class="dropdown-menu">
-				<a href="/profile">Profile</a>
-				<a href="/sign-out">Sign Out</a>
+				<a href="{{ url_for('auth.profile') }}">Profile</a>
+				<a href="{{ url_for('auth.logout') }}">Sign Out</a>
 			</div>
+			{% else %}
+			<div class="avatar">G</div>
+			<div class="dropdown-menu">
+				<a href="{{ url_for('auth.login') }}">Login</a>
+				<a href="{{ url_for('auth.signup') }}">Sign Up</a>
+			</div>
+			{% endif %}
 		</div>
 	</header>
 

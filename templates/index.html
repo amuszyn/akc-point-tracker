@@ -1,52 +1,43 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>AKC Point Tracker</title>
-	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-</head>
+{% block content %}
+<h1>Dogs by AKC Agility Points</h1>
+<a href="/create-dog" class="btn btn-primary mb-3">Add New Dog</a>
 
-{% include 'app-bar.html' %}
-
-<div class="container">
-
-	<h1>Dogs by AKC Agility Points</h1>
-	<a href="/create-dog" class="btn btn-primary mb-3">Add New Item</a>
-
-	{% if items %}
-	<table class="table table-striped">
-		<thead>
-			<tr>
-				<th>ID</th>
-				<th>Name</th>
-				<th>Show Name</th>
-				<th>Points</th>
-				<th>Owner's Name</th>
-				<th>Actions</th>
-			</tr>
-		</thead>
-		<tbody>
-			{% for item in items %}
-			<tr class="clickable" onclick="window.location.href='/runs/{{item.show_name}}'">
-				<td>{{ item.id }}</td>
-				<td>{{ item.name }}</td>
-				<td>{{ item.show_name}}</td>
-				<td>{{ item.points}}</td>
-				<td>{{ item.owner}}</td>
-				<td>
-					<a href="/update-dog/{{ item.id }}" class="btn btn-warning">Update</a>
-					<a href="/delete-dog/{{ item.id }}" class="btn btn-danger">Delete</a>
-				</td>
-			</tr>
-			{% endfor %}
-		</tbody>
-	</table>
-	{% else %}
-	<p>No items found. Please <a href="/create-dog">create a new item</a>.</p>
-	{% endif %}
-</div>
-</body>
-
-</html>
+{% if items %}
+<table class="table table-striped">
+	<thead>
+		<tr>
+			<th>ID</th>
+			<th>Name</th>
+			<th>Show Name</th>
+			<th>Points</th>
+			<th>Owner's Name</th>
+			<th>Actions</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for item in items %}
+		<tr class="clickable" onclick="window.location.href='/runs/{{item.show_name}}'">
+			<td>{{ item.id }}</td>
+			<td>{{ item.name }}</td>
+			<td>{{ item.show_name}}</td>
+			<td>{{ item.points}}</td>
+			<td>{{ item.owner}}</td>
+			<td onclick="event.stopPropagation()">
+				{% if current_user.id == item.created_by or current_user.is_admin %}
+				<a href="/update-dog/{{ item.id }}" class="btn btn-warning btn-sm">Update</a>
+				<a href="/delete-dog/{{ item.id }}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this dog?')">Delete</a>
+				{% else %}
+				<button class="btn btn-warning btn-sm" onclick="return handleUnauthorizedAction('update', 'dog')">Update</button>
+				<button class="btn btn-danger btn-sm" onclick="return handleUnauthorizedAction('delete', 'dog')">Delete</button>
+				{% endif %}
+			</td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>
+{% else %}
+<p>No items found. Please <a href="/create-dog">create a new item</a>.</p>
+{% endif %}
+{% endblock %}

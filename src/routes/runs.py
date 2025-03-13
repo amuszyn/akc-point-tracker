@@ -2,7 +2,8 @@ from flask import Blueprint
 from src.models.models import Runs, Dogs, db
 from src.models.helpers import delete_item_by_id, query_items, get_item
 from src.constants import PLACEMENTS, CLASSES, JUMP_HEIGHTS
-from flask import render_template, request, redirect
+from flask import render_template, request, redirect, flash
+from flask_login import current_user, login_required
 from datetime import datetime
 
 runs = Blueprint("runs", __name__)
@@ -22,65 +23,185 @@ def get_runs(name):
 
 
 @runs.route("/create-run/<string:show_name>", methods=["GET", "POST"])
-def create_run(show_name: str):
+@login_required
+def create_run(show_name):
     dog = get_item(Dogs, Dogs.show_name, show_name)
-    assert isinstance(dog, Dogs)
-    if request.method == "POST":
-        run_time = request.form["run_time"]
-        course_time = request.form["course_time"]
-        new_item = Runs(
-            pet_id=dog.id,
-            name=dog.name,
-            show_name=dog.show_name,
-            run_time=run_time,
-            course_time=course_time,
-            qualification=False,
-            handler=request.form["handler"],
-            points=points_calc(run_time, course_time),
-            trial=request.form["trial"],
-            timestamp=datetime.fromisoformat(request.form["timestamp"]),
-            height=request.form["height"],
-            place=request.form["place"],
-            judge=request.form["judge"],
-            run_class=request.form["run_class"],
-        )
+    if not dog:
+        flash("Dog not found.", "error")
+        return redirect("/")
 
-        db.session.add(new_item)
-        db.session.commit()
-        return redirect(f"/runs/{show_name}")
+    if request.method == "POST":
+        try:
+            # Get form data
+            run_time = float(request.form.get("run_time"))
+            course_time = float(request.form.get("course_time"))
+            handler = request.form.get("handler")
+            trial = request.form.get("trial")
+            judge = request.form.get("judge")
+            height = request.form.get("height")
+            place = request.form.get("place")
+            run_class = request.form.get("run_class")
+            timestamp_str = request.form.get("timestamp")
+            
+            if not timestamp_str:
+                flash("Run date is required.", "error")
+                raise ValueError("Run date is required")
+                
+            timestamp = datetime.strptime(timestamp_str, "%Y-%m-%d")
+
+            # Calculate qualification and points
+            qualification = run_time <= course_time
+            points = points_calc(run_time, course_time)
+
+            # Create new run
+            run = Runs(
+                name=dog.name,
+                pet_id=dog.id,
+                show_name=show_name,
+                run_time=run_time,
+                course_time=course_time,
+                qualification=qualification,
+                points=points,
+                handler=handler or "",  # Ensure not None
+                trial=trial or "",
+                timestamp=timestamp,
+                height=height or "N/A",
+                place=place or "N/A",
+                judge=judge or "",
+                run_class=run_class or "N/A",
+                created_by=current_user.id
+            )
+
+            db.session.add(run)
+            db.session.commit()
+            flash("Run added successfully!", "success")
+            return redirect(f"/runs/{show_name}")
+
+        except ValueError as e:
+            print(f"Validation error creating run: {e}")
+            db.session.rollback()
+            flash(str(e) if str(e) != "Run date is required" else "Run date is required.", "error")
+            return render_template(
+                "create-run.html",
+                dog=dog,
+                placements=sorted(list(PLACEMENTS)),
+                classes=sorted(list(CLASSES)),
+                heights=sorted(list(JUMP_HEIGHTS)),
+            )
+        except Exception as e:
+            print(f"Error creating run: {e}")
+            db.session.rollback()
+            flash("Error creating run: Please check all fields are filled correctly.", "error")
+            return render_template(
+                "create-run.html",
+                dog=dog,
+                placements=sorted(list(PLACEMENTS)),
+                classes=sorted(list(CLASSES)),
+                heights=sorted(list(JUMP_HEIGHTS)),
+            )
+
+    # GET request
     return render_template(
         "create-run.html",
-        show_name=show_name,
         dog=dog,
-        run_class=CLASSES,
-        placements=PLACEMENTS,
-        jump_heights=JUMP_HEIGHTS,
+        placements=sorted(list(PLACEMENTS)),
+        classes=sorted(list(CLASSES)),
+        heights=sorted(list(JUMP_HEIGHTS)),
     )
 
 
 # Update existing record route
 @runs.route("/update-run/<int:id>", methods=["GET", "POST"])
+@login_required
 def update_run(id):
-    item = get_item(Dogs, Dogs.id, id)
-    assert isinstance(item, Dogs)
-    if request.method == "POST":
-        item.name = request.form["name"]
-        item.show_name = request.form["show_name"]
-        item.points = int(request.form["points"])
-
-        db.session.commit()
+    item = Runs.query.get(id)
+    if not item:
+        flash("Record not found.", "error")
         return redirect("/")
-    return render_template("update-run.html", item=item)
+        
+    # Check if user is authorized to update
+    if not (current_user.id == item.created_by or current_user.is_admin):
+        flash("You are not authorized to update this record.", "error")
+        return redirect(f"/runs/{item.show_name}")
+        
+    if request.method == "POST":
+        try:
+            # Update run data
+            item.run_time = float(request.form["run_time"])
+            item.course_time = float(request.form["course_time"])
+            item.handler = request.form.get("handler", "")
+            item.points = points_calc(item.run_time, item.course_time)
+            item.trial = request.form.get("trial", "")
+            
+            # Handle date properly
+            date_str = request.form["timestamp"]
+            try:
+                if date_str:
+                    item.timestamp = datetime.strptime(date_str, "%Y-%m-%d")
+            except ValueError:
+                flash("Invalid date format. Please use YYYY-MM-DD.", "error")
+                return render_template(
+                    "update-run.html", 
+                    item=item,
+                    placements=sorted(list(PLACEMENTS)),
+                    classes=sorted(list(CLASSES)),
+                    heights=sorted(list(JUMP_HEIGHTS))
+                )
+                
+            item.height = request.form.get("height", "N/A")
+            item.place = request.form.get("place", "N/A")
+            item.judge = request.form.get("judge", "")
+            item.run_class = request.form.get("run_class", "N/A")
+
+            db.session.commit()
+            flash("Run updated successfully.", "success")
+            return redirect(f"/runs/{item.show_name}")
+        except Exception as e:
+            print(f"Error updating run: {e}")
+            db.session.rollback()
+            flash("Error updating run.", "error")
+            return render_template(
+                "update-run.html", 
+                item=item,
+                placements=sorted(list(PLACEMENTS)),
+                classes=sorted(list(CLASSES)),
+                heights=sorted(list(JUMP_HEIGHTS))
+            )
+            
+    return render_template(
+        "update-run.html", 
+        item=item,
+        placements=sorted(list(PLACEMENTS)),
+        classes=sorted(list(CLASSES)),
+        heights=sorted(list(JUMP_HEIGHTS))
+    )
 
 
 # Delete a record route
-# TODO: add a flag for 'deleted' items
 @runs.route("/delete-run/<int:id>")
+@login_required
 def delete_run(id):
-    item = get_item(Runs, Runs.id, id)
-    delete_item_by_id(Runs, id)
-    assert isinstance(item, Runs)
-    return redirect(f"/runs/{item.show_name}")
+    try:
+        item = Runs.query.get(id)
+        if not item:
+            flash("Record not found.", "error")
+            return redirect("/")
+            
+        # Check if user is authorized to delete
+        if not (current_user.id == item.created_by or current_user.is_admin):
+            flash("You are not authorized to delete this record.", "error")
+            return redirect("/")
+            
+        show_name = item.show_name
+        db.session.delete(item)
+        db.session.commit()
+        flash("Run deleted successfully.", "success")
+        return redirect(f"/runs/{show_name}")
+    except Exception as e:
+        print(f"Error deleting run: {e}")
+        db.session.rollback()
+        flash("Error deleting run.", "error")
+        return redirect("/")
 
 
 def points_calc(run_time, course_time):

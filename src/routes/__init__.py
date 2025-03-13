@@ -1,4 +1,9 @@
-from .runs import runs
-from .blueprint import blueprint
-from .dogs import dogs
-from .search import search
+from src.routes.blueprint import blueprint
+from src.routes.dogs import dogs
+from src.routes.runs import runs
+from src.routes.search import search
+from src.routes.leaderboard import leaderboard
+from src.routes.auth import auth
+
+# Export all blueprints
+__all__ = ['blueprint', 'dogs', 'runs', 'search', 'leaderboard', 'auth']

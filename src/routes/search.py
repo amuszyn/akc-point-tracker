@@ -1,7 +1,6 @@
 from flask import Blueprint, jsonify, request
 from sqlalchemy import or_, select
-from src.models.models import Dogs
-from src.models.helpers import db, get_item
+from src.models.models import Dogs, Owner, db
 
 search = Blueprint("search", __name__)
 
@@ -9,14 +8,21 @@ search = Blueprint("search", __name__)
 @search.post("/search")
 def do_search():
     query = request.form.get("query")
-    #    owner_q = select(Owner).where(Owner.name.ilike(f"%{query}%"))
-    #    owner_results = db.session.execute(owner_q).scalars().all()
+    
+    # Search dogs
+    dog_results = Dogs.query.filter(
+        or_(
+            Dogs.name.ilike(f"%{query}%"),
+            Dogs.show_name.ilike(f"%{query}%")
+        )
+    ).all()
 
-    dog_query = select(Dogs).where(
-        or_(Dogs.name.__eq__(query), Dogs.show_name.__eq__(query))
-    )
-    dog_results = db.session.execute(dog_query).scalars().all()
+    # Search owners
+    owner_results = Owner.query.filter(
+        Owner.name.ilike(f"%{query}%")
+    ).all()
 
-    dog_results = get_item(Dogs, Dogs.name, f"%{query}%")
-
-    return jsonify(dog_results)
+    return jsonify({
+        "dogs": [{"name": d.name, "show_name": d.show_name} for d in dog_results],
+        "owners": [{"name": o.name} for o in owner_results]
+    })
