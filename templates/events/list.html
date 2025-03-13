@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Upcoming Events</h1>
+        <div>
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('events.create_event') }}" class="btn btn-primary">Add New Event</a>
+            {% endif %}
+            <div class="btn-group ms-2">
+                <a href="{{ url_for('events.list_events', view='list') }}" class="btn btn-outline-secondary active">List View</a>
+                <a href="{{ url_for('events.list_events', view='calendar') }}" class="btn btn-outline-secondary">Calendar View</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form class="row g-3" method="GET" action="{{ url_for('events.list_events') }}">
+                <input type="hidden" name="view" value="list">
+                <div class="col-md-4">
+                    <label for="zipcode" class="form-label">Zipcode</label>
+                    <input type="text" class="form-control" id="zipcode" name="zipcode" value="{{ request.args.get('zipcode', '') }}" pattern="[0-9]{5}" title="Five digit zip code">
+                </div>
+                <div class="col-md-4">
+                    <label for="radius" class="form-label">Radius (miles)</label>
+                    <select class="form-select" id="radius" name="radius">
+                        <option value="25" {% if request.args.get('radius') == '25' %}selected{% endif %}>25 miles</option>
+                        <option value="50" {% if request.args.get('radius', '50') == '50' %}selected{% endif %}>50 miles</option>
+                        <option value="100" {% if request.args.get('radius') == '100' %}selected{% endif %}>100 miles</option>
+                        <option value="200" {% if request.args.get('radius') == '200' %}selected{% endif %}>200 miles</option>
+                    </select>
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary">Filter Events</button>
+                    {% if request.args.get('zipcode') %}
+                    <a href="{{ url_for('events.list_events', view='list') }}" class="btn btn-outline-secondary ms-2">Clear Filter</a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if not events_by_month %}
+    <div class="alert alert-info">
+        No upcoming events found{% if request.args.get('zipcode') %} in your area{% endif %}.
+    </div>
+    {% endif %}
+
+    {% for month, events in events_by_month.items() %}
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">{{ month }}</h3>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Dates</th>
+                            <th>Event</th>
+                            <th>Location</th>
+                            <th>Club</th>
+                            <th>Judge</th>
+                            <th>Entry Fee</th>
+                            <th>Closing Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for event in events %}
+                        <tr>
+                            <td>
+                                {{ event.start_date.strftime('%b %d') }}
+                                {% if event.start_date != event.end_date %}
+                                - {{ event.end_date.strftime('%b %d') }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ url_for('events.view_event', id=event.id) }}">{{ event.name }}</a>
+                                {% if event.website %}
+                                <a href="{{ event.website }}" target="_blank" class="ms-2"><i class="fas fa-external-link-alt"></i></a>
+                                {% endif %}
+                            </td>
+                            <td>{{ event.city }}, {{ event.state }}</td>
+                            <td>{{ event.club_name }}</td>
+                            <td>{{ event.judge_name or 'TBD' }}</td>
+                            <td>${{ "%.2f"|format(event.entry_fee) if event.entry_fee else 'TBD' }}</td>
+                            <td>{{ event.closing_date.strftime('%b %d') if event.closing_date else 'TBD' }}</td>
+                            <td>
+                                {% if current_user.is_authenticated and (current_user.id == event.created_by or current_user.is_admin) %}
+                                <div class="btn-group">
+                                    <a href="{{ url_for('events.edit_event', id=event.id) }}" class="btn btn-warning btn-sm">Edit</a>
+                                    <button type="button" class="btn btn-danger btn-sm" onclick="if(confirm('Are you sure you want to delete this event?')) { document.getElementById('delete-form-{{ event.id }}').submit(); }">Delete</button>
+                                </div>
+                                <form id="delete-form-{{ event.id }}" action="{{ url_for('events.delete_event', id=event.id) }}" method="POST" style="display: none;"></form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %} 

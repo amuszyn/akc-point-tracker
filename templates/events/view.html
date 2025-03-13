@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>{{ event.name }}</h1>
+        <div>
+            {% if current_user.is_authenticated and (current_user.id == event.created_by or current_user.is_admin) %}
+            <a href="{{ url_for('events.edit_event', id=event.id) }}" class="btn btn-warning">Edit Event</a>
+            <button type="button" class="btn btn-danger" onclick="if(confirm('Are you sure you want to delete this event?')) { document.getElementById('delete-form').submit(); }">Delete Event</button>
+            <form id="delete-form" action="{{ url_for('events.delete_event', id=event.id) }}" method="POST" style="display: none;"></form>
+            {% endif %}
+            <a href="{{ url_for('events.list_events') }}" class="btn btn-outline-secondary">Back to Events</a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Event Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <strong>Date:</strong><br>
+                            {{ event.start_date.strftime('%B %d, %Y') }}
+                            {% if event.start_date != event.end_date %}
+                            - {{ event.end_date.strftime('%B %d, %Y') }}
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Club:</strong><br>
+                            {{ event.club_name }}
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Judge:</strong><br>
+                            {{ event.judge_name or 'TBD' }}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-8">
+                            <strong>Location:</strong><br>
+                            {{ event.location_name }}<br>
+                            {{ event.address }}<br>
+                            {{ event.city }}, {{ event.state }} {{ event.zipcode }}
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Entry Fee:</strong><br>
+                            {% if event.entry_fee %}
+                            ${{ "%.2f"|format(event.entry_fee) }}
+                            {% else %}
+                            TBD
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if event.closing_date %}
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <strong>Closing Date:</strong><br>
+                            {{ event.closing_date.strftime('%B %d, %Y') }}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if event.website %}
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <strong>Website:</strong><br>
+                            <a href="{{ event.website }}" target="_blank">{{ event.website }}</a>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if event.classes_offered %}
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <strong>Classes Offered:</strong><br>
+                            <div class="d-flex flex-wrap gap-2 mt-2">
+                                {% for class in event.classes_offered|from_json %}
+                                <span class="badge bg-primary">{{ class }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if event.notes %}
+                    <div class="row">
+                        <div class="col-12">
+                            <strong>Notes:</strong><br>
+                            {{ event.notes|nl2br }}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Location Map</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div id="map" style="height: 300px;"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Weather Forecast</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Weather forecast will be available closer to the event date.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<style>
+    #map { width: 100%; height: 300px; }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize map
+    var map = L.map('map').setView([0, 0], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Geocode address and update map
+    var address = "{{ event.address }}, {{ event.city }}, {{ event.state }} {{ event.zipcode }}";
+    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.length > 0) {
+                var lat = parseFloat(data[0].lat);
+                var lon = parseFloat(data[0].lon);
+                map.setView([lat, lon], 13);
+                L.marker([lat, lon]).addTo(map)
+                    .bindPopup("{{ event.location_name }}");
+            }
+        })
+        .catch(error => console.error('Error:', error));
+});
+</script>
+{% endblock %} 

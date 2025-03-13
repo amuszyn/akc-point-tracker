@@ -111,3 +111,49 @@ class User(UserMixin, db.Model):
         
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+
+
+class Event(db.Model):
+    __bind_key__ = 'dogs'
+    __tablename__ = "events"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String(200), nullable=False)
+    start_date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    end_date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    location_name: Mapped[str] = mapped_column(String(200), nullable=False)
+    address: Mapped[str] = mapped_column(String(200), nullable=False)
+    city: Mapped[str] = mapped_column(String(100), nullable=False)
+    state: Mapped[str] = mapped_column(String(2), nullable=False)
+    zipcode: Mapped[str] = mapped_column(String(10), nullable=False)
+    club_name: Mapped[str] = mapped_column(String(200), nullable=False)
+    website: Mapped[str] = mapped_column(String(500), nullable=True)
+    entry_fee: Mapped[float] = mapped_column(Float, nullable=True)
+    closing_date: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+    judge_name: Mapped[str] = mapped_column(String(100), nullable=True)
+    classes_offered: Mapped[str] = mapped_column(String(500), nullable=True)  # Stored as JSON string
+    notes: Mapped[str] = mapped_column(String(1000), nullable=True)
+    created_by: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    
+    creator = db.relationship("User", backref="events", lazy=True)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'start_date': self.start_date.strftime('%Y-%m-%d'),
+            'end_date': self.end_date.strftime('%Y-%m-%d'),
+            'location_name': self.location_name,
+            'address': self.address,
+            'city': self.city,
+            'state': self.state,
+            'zipcode': self.zipcode,
+            'club_name': self.club_name,
+            'website': self.website,
+            'entry_fee': self.entry_fee,
+            'closing_date': self.closing_date.strftime('%Y-%m-%d') if self.closing_date else None,
+            'judge_name': self.judge_name,
+            'classes_offered': self.classes_offered,
+            'notes': self.notes
+        }

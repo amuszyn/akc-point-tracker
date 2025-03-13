@@ -3,7 +3,7 @@ from src.models.models import db, User
 from flask_migrate import Migrate
 from flask_login import LoginManager
 import os
-from src.routes import blueprint, dogs, runs, search, leaderboard
+from src.routes import blueprint, dogs, runs, search, leaderboard, events
 from src.routes.auth import auth  # Import auth blueprint directly
 
 
@@ -50,6 +50,7 @@ def create_app():
     app.register_blueprint(search)
     app.register_blueprint(leaderboard)
     app.register_blueprint(auth)  # Register auth blueprint
+    app.register_blueprint(events)  # Register events blueprint
 
     # Create tables within app context
     with app.app_context():

@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block head %}
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
+<style>
+    .fc-event {
+        cursor: pointer;
+    }
+    .fc-event-title {
+        white-space: normal;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Upcoming Events</h1>
+        <div>
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('events.create_event') }}" class="btn btn-primary">Add New Event</a>
+            {% endif %}
+            <div class="btn-group ms-2">
+                <a href="{{ url_for('events.list_events', view='list') }}" class="btn btn-outline-secondary">List View</a>
+                <a href="{{ url_for('events.list_events', view='calendar') }}" class="btn btn-outline-secondary active">Calendar View</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form class="row g-3" method="GET" action="{{ url_for('events.list_events') }}">
+                <input type="hidden" name="view" value="calendar">
+                <div class="col-md-4">
+                    <label for="zipcode" class="form-label">Zipcode</label>
+                    <input type="text" class="form-control" id="zipcode" name="zipcode" value="{{ request.args.get('zipcode', '') }}" pattern="[0-9]{5}" title="Five digit zip code">
+                </div>
+                <div class="col-md-4">
+                    <label for="radius" class="form-label">Radius (miles)</label>
+                    <select class="form-select" id="radius" name="radius">
+                        <option value="25" {% if request.args.get('radius') == '25' %}selected{% endif %}>25 miles</option>
+                        <option value="50" {% if request.args.get('radius', '50') == '50' %}selected{% endif %}>50 miles</option>
+                        <option value="100" {% if request.args.get('radius') == '100' %}selected{% endif %}>100 miles</option>
+                        <option value="200" {% if request.args.get('radius') == '200' %}selected{% endif %}>200 miles</option>
+                    </select>
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary">Filter Events</button>
+                    {% if request.args.get('zipcode') %}
+                    <a href="{{ url_for('events.list_events', view='calendar') }}" class="btn btn-outline-secondary ms-2">Clear Filter</a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div id="calendar"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,dayGridWeek'
+        },
+        events: [
+            {% for event in events %}
+            {
+                title: '{{ event.name }}',
+                start: '{{ event.start_date.strftime("%Y-%m-%d") }}',
+                end: '{{ (event.end_date + timedelta(days=1)).strftime("%Y-%m-%d") }}',
+                url: '{{ url_for("events.view_event", id=event.id) }}',
+                extendedProps: {
+                    location: '{{ event.city }}, {{ event.state }}',
+                    club: '{{ event.club_name }}',
+                    judge: '{{ event.judge_name or "TBD" }}'
+                }
+            }{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ],
+        eventDidMount: function(info) {
+            info.el.title = `${info.event.title}\n${info.event.extendedProps.location}\n${info.event.extendedProps.club}\nJudge: ${info.event.extendedProps.judge}`;
+        }
+    });
+    calendar.render();
+});
+</script>
+{% endblock %} 
