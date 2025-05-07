@@ -1,6 +1,5 @@
 from flask import Blueprint, jsonify, request, send_file
 import json
-import os
 import tempfile
 from datetime import datetime
 from src.models.models import Dogs, Runs, db

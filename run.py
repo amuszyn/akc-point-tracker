@@ -1,6 +1,7 @@
 from app import create_app, db
-from src.models.models import Dogs, Runs, Titles, Owner
+from waitress import serve
 import os
+
 
 # Create the application instance
 app = create_app()
@@ -19,4 +20,4 @@ with app.app_context():
         print(f"Instance path: {app.instance_path}")
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    serve(app, host="0.0.0.0", port=8080)

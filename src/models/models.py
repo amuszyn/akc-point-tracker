@@ -7,7 +7,7 @@ from sqlalchemy import (
     Float,
     Boolean,
 )
-from sqlalchemy.orm import DeclarativeBase, backref, mapped_column, Mapped
+from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin

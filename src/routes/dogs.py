@@ -1,7 +1,6 @@
-from flask import Blueprint, current_app
+from flask import Blueprint
 from src.models.models import Dogs, db
-from src.models.helpers import delete_item_by_id, get_item
-from flask import render_template, request, redirect, flash, abort
+from flask import render_template, request, redirect, flash
 from flask_login import current_user, login_required
 
 dogs = Blueprint("dogs", __name__)

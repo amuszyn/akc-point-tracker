@@ -1,6 +1,6 @@
 from flask import Blueprint
 from src.models.models import Runs, Dogs, db
-from src.models.helpers import delete_item_by_id, query_items, get_item
+from src.models.helpers import query_items, get_item
 from src.constants import PLACEMENTS, CLASSES, JUMP_HEIGHTS
 from flask import render_template, request, redirect, flash
 from flask_login import current_user, login_required

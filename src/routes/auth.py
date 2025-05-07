@@ -1,7 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, session
 from flask_login import login_user, logout_user, login_required, current_user
 from src.models.models import User, db
-from werkzeug.security import generate_password_hash, check_password_hash
 from urllib.parse import urlparse
 
 auth = Blueprint("auth", __name__)
@@ -108,7 +107,7 @@ def update_profile():
         try:
             db.session.commit()
             flash("Profile updated successfully!", "success")
-        except Exception as e:
+        except Exception:
             db.session.rollback()
             flash("An error occurred while updating your profile.", "error")
             
@@ -144,7 +143,7 @@ def change_password():
             db.session.commit()
             flash("Password changed successfully!", "success")
             return redirect(url_for("auth.profile"))
-        except Exception as e:
+        except Exception:
             db.session.rollback()
             flash("An error occurred while changing your password.", "error")
             return redirect(url_for("auth.change_password"))

@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template
-from src.models.models import Runs, Dogs, db
+from src.models.models import Dogs, db
 from sqlalchemy import select
 
 

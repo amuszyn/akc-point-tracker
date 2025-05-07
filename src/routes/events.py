@@ -1,10 +1,8 @@
-from flask import Blueprint, render_template, request, jsonify, flash, redirect, url_for 
+from flask import Blueprint, render_template, request, flash, redirect, url_for 
 from flask_login import login_required, current_user
 from src.models.models import Event, db
 from datetime import datetime
 import json
-from sqlalchemy import or_, and_
-import requests
 from math import radians, cos, sin, asin, sqrt
 from markupsafe import Markup
 

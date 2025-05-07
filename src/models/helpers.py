@@ -1,7 +1,4 @@
-from sqlalchemy import select
 from .models import db
-from src.models.models import db as models_db
-from sqlalchemy import inspect
 
 
 def delete_item_by_id(model, id):

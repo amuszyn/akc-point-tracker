@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
-from sqlalchemy import or_, select
-from src.models.models import Dogs, Owner, db
+from sqlalchemy import or_
+from src.models.models import Dogs, Owner
 
 search = Blueprint("search", __name__)
 
